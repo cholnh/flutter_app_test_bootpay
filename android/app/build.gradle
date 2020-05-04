@@ -22,6 +22,7 @@ if (flutterVersionName == null) {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services' // fcm
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
@@ -62,4 +63,12 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.github.bootpay:client_android_java:2.14'
+
+    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+    implementation 'com.google.firebase:firebase-messaging:20.1.6'
+
+    api 'com.google.firebase:firebase-messaging:18.0.0'
+    implementation 'com.google.firebase:firebase-common:16.1.0'
+    implementation 'androidx.annotation:annotation:1.0.0'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 }

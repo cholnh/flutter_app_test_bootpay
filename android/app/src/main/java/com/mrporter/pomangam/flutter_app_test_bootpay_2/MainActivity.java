@@ -1,10 +1,16 @@
 package com.mrporter.pomangam.flutter_app_test_bootpay_2;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
-import io.flutter.app.FlutterActivity;
+import androidx.annotation.NonNull;
+
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugins.GeneratedPluginRegistrant;
 import kr.co.bootpay.Bootpay;
 import kr.co.bootpay.BootpayAnalytics;
 import kr.co.bootpay.enums.Method;
@@ -13,19 +19,36 @@ import kr.co.bootpay.listner.EventListener;
 
 public class MainActivity extends FlutterActivity {
   private static final String CHANNEL = "com.mrporter.pomangam/bootpay";
+  private MethodChannel methodChannel;
+  private Handler handler;
+
+  @Override
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    GeneratedPluginRegistrant.registerWith(flutterEngine);
+  }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
 
-    new MethodChannel(getFlutterView(), CHANNEL).setMethodCallHandler((call, result) -> {
+    methodChannel = new MethodChannel(getFlutterEngine().getDartExecutor().getBinaryMessenger(), CHANNEL);
+
+    handler = new Handler(Looper.getMainLooper());
+
+    methodChannel.setMethodCallHandler((call, result) -> {
       if (call.method.equals("openPay")) {
         bootpayRequest();
         result.success("hi success !!");
       } else {
         result.success("no method");
       }
+    });
+  }
+
+  private void callBack(String msg) {
+    handler.post(() -> {
+      methodChannel.invokeMethod("handleCallback", msg);
     });
   }
 
@@ -37,7 +60,7 @@ public class MainActivity extends FlutterActivity {
       .setApplicationId("5cc70f38396fa67747bd0684") // 해당 프로젝트(안드로이드)의 application id 값
       .setPG(PG.KCP) // 결제할 PG 사
       //.setUserPhone("010-1234-5678") // 구매자 전화번호
-      .setMethod(Method.CARD) // 결제수단
+      .setMethod(Method.VBANK) // 결제수단
       //.isShowAgree(true)
       .setName("싸이버거 세트 외 2건") // 결제할 상품명
       .setOrderId("1234") // 결제 고유번호
@@ -62,27 +85,27 @@ public class MainActivity extends FlutterActivity {
 
     @Override
     public void onClose(String s) {
-      Log.d("bootpay onClose", s);
+      callBack("onClose");
     }
 
     @Override
     public void onConfirm(String s) {
-      Log.d("bootpay onConfirm", s);
+      callBack("onConfirm");
     }
 
     @Override
     public void onDone(String s) {
-      Log.d("bootpay onDone", s);
+      callBack("onDone");
     }
 
     @Override
     public void onError(String s) {
-      Log.d("bootpay onError", s);
+      callBack("onError");
     }
 
     @Override
     public void onReady(String s) {
-      Log.d("bootpay onReady", s);
+      callBack("onReady");
     }
   }
 }

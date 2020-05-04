@@ -1,7 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-void main() => runApp(FlutterView());
+final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+void main() {
+  runApp(FlutterView());
+}
+
+void firebaseCloudMessagingListeners() {
+  // if (Platform.isIOS) iOS_Permission();
+
+  _firebaseMessaging.getToken().then((token) {
+    print('token: $token');
+  });
+
+  _firebaseMessaging.configure(
+    onMessage: (Map<String, dynamic> message) async {
+      print('on message $message');
+    },
+    onResume: (Map<String, dynamic> message) async {
+      print('on resume $message');
+    },
+    onLaunch: (Map<String, dynamic> message) async {
+      print('on launch $message');
+    },
+  );
+}
 
 class FlutterView extends StatelessWidget {
   @override
@@ -28,6 +53,27 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   static const platform = const MethodChannel('com.mrporter.pomangam/bootpay');
+
+  _MyHomePageState() {
+
+    platform.setMethodCallHandler(_handleMethod);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    firebaseCloudMessagingListeners();
+  }
+
+  Future<dynamic> _handleMethod(MethodCall call) async {
+    switch (call.method) {
+      case 'handleCallback':
+        print('arguments: ${call.arguments}');
+        break;
+      default:
+        throw ('method not defined');
+    }
+  }
 
   Future<void> _openPay() async {
     try {
